@@ -1,0 +1,41 @@
+asyncapi: 3.0.0
+info:
+  title: Orders Events
+  version: 1.0.0
+  description: Демонстрационный контракт Kafka (без подключения к брокеру).
+defaultContentType: application/json
+servers:
+  kafka:
+    host: kafka.example.internal:9092
+    protocol: kafka
+channels:
+  orderEvents:
+    address: orders.events
+    messages:
+      orderCreated:
+        $ref: '#/components/messages/OrderCreated'
+operations:
+  publishOrderCreated:
+    action: send
+    channel:
+      $ref: '#/channels/orderEvents'
+    messages:
+      - $ref: '#/channels/orderEvents/messages/orderCreated'
+components:
+  messages:
+    OrderCreated:
+      name: OrderCreated
+      payload:
+        type: object
+        required:
+          - eventId
+          - orderId
+        properties:
+          eventId:
+            type: string
+            format: uuid
+          orderId:
+            type: string
+          occurredAt:
+            type: string
+            format: date-time

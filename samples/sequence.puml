@@ -1,0 +1,10 @@
+@startuml
+title API sequence
+actor Analyst
+participant API
+database DB
+Analyst -> API: GET /items/42
+API -> DB: SELECT
+DB --> API: Item
+API --> Analyst: 200 OK
+@enduml

@@ -1,0 +1,88 @@
+# Docker Compose для набора системного аналитика, Portainer отдельно.
+# Адрес Kroki передаётся Mermaid при запуске. После изменения .env:
+# sudo docker compose up -d --no-build mermaid-editor
+name: sa-analyst-suite
+
+services:
+  kroki:
+    image: yuzutech/kroki:latest
+    restart: unless-stopped
+    environment:
+      KROKI_SAFE_MODE: SECURE
+      KROKI_MERMAID_HOST: kroki-mermaid
+      KROKI_BPMN_HOST: kroki-bpmn
+      KROKI_EXCALIDRAW_HOST: kroki-excalidraw
+    ports:
+      - "${BIND_IP:?Set BIND_IP in .env}:${KROKI_PORT:-18087}:8000"
+    depends_on:
+      - kroki-mermaid
+      - kroki-bpmn
+
+  kroki-mermaid:
+    image: yuzutech/kroki-mermaid:latest
+    restart: unless-stopped
+    expose:
+      - "8002"
+
+  kroki-bpmn:
+    image: yuzutech/kroki-bpmn:latest
+    restart: unless-stopped
+    expose:
+      - "8003"
+
+  # Опционально: sudo docker compose --profile extras up -d
+  kroki-excalidraw:
+    image: yuzutech/kroki-excalidraw:latest
+    restart: unless-stopped
+    profiles: ["extras"]
+    expose:
+      - "8004"
+
+  mermaid-editor:
+    image: ${MERMAID_IMAGE:-ghcr.io/denbond007/mermaid-live-editor-runtime:1.0.0}
+    environment:
+      # URL открывается браузером сотрудника, поэтому используется LAN IP/DNS.
+      KROKI_URL: "${KROKI_URL:-http://${BIND_IP:?Set BIND_IP in .env}:${KROKI_PORT:-18087}}"
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP}:${MERMAID_PORT:-18081}:8080"
+    depends_on:
+      - kroki
+
+  plantuml:
+    image: plantuml/plantuml-server:jetty
+    restart: unless-stopped
+    environment:
+      PLANTUML_SECURITY_PROFILE: SANDBOX
+    ports:
+      - "${BIND_IP}:${PLANTUML_PORT:-18082}:8080"
+
+  swagger-editor:
+    image: docker.swagger.io/swaggerapi/swagger-editor:next-v5
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP}:${SWAGGER_EDITOR_PORT:-18083}:80"
+
+  swagger-ui:
+    image: docker.swagger.io/swaggerapi/swagger-ui:latest
+    restart: unless-stopped
+    environment:
+      SWAGGER_JSON: /specs/openapi.yaml
+      VALIDATOR_URL: none                 # отключает публичный swagger validator
+      SUPPORTED_SUBMIT_METHODS: "[]"      # отключает Try it out для безопасности
+    volumes:
+      - ./specs:/specs:ro
+    ports:
+      - "${BIND_IP}:${SWAGGER_UI_PORT:-18084}:8080"
+
+  drawio:
+    image: jgraph/drawio:latest
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP}:${DRAWIO_PORT:-18085}:8080"
+
+  asyncapi:
+    image: asyncapi/studio:latest
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP}:${ASYNCAPI_PORT:-18086}:80"

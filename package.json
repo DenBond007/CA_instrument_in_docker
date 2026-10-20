@@ -1,0 +1,12 @@
+{
+  "name": "ca-instrument-docker-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/mermaid-runtime.test.mjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0"
+  }
+}

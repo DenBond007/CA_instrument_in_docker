@@ -1,0 +1,14 @@
+# Запускать только если Portainer ещё не установлен.
+name: sa-portainer
+services:
+  portainer:
+    image: portainer/portainer-ce:lts
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:?Set BIND_IP in .env}:${PORTAINER_PORT:-9443}:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+volumes:
+  portainer_data:
+    name: portainer_data

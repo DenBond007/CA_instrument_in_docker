@@ -1,0 +1,9 @@
+sequenceDiagram
+    autonumber
+    actor Analyst
+    participant API
+    participant DB
+    Analyst->>API: GET /items/42
+    API->>DB: SELECT item WHERE id = 42
+    DB-->>API: item
+    API-->>Analyst: HTTP 200

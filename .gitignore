@@ -1,0 +1,10 @@
+.env
+vendor/mermaid-live-editor/
+backup/*.tar.gz
+backup/*.tgz
+.obsidian/workspace*
+.DS_Store
+node_modules/
+playwright-report/
+test-results/
+__pycache__/

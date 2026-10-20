@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  title: Demo API for System Analysts
+  version: 1.0.0
+  description: Локальный пример. Замените на свой контракт.
+servers:
+  - url: http://localhost:18080
+    description: Пример адреса сервиса, не развёрнутого этим комплектом
+paths:
+  /health:
+    get:
+      summary: Проверка состояния приложения
+      operationId: checkHealth
+      responses:
+        '200':
+          description: Сервис доступен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
