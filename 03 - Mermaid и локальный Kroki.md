@@ -17,7 +17,11 @@ tags: [mermaid, kroki, runtime, ghcr, конфиденциальность]
 
 Пакет: https://github.com/users/DenBond007/packages/container/package/mermaid-live-editor-runtime
 
-Для закрытого пакета выполните `sudo docker login ghcr.io -u YOUR_GITHUB_LOGIN`. В запрос пароля введите GitHub personal access token **classic** с `read:packages`; учётная запись должна иметь доступ к пакету. Не сохраняйте токен в Compose, `.env` проекта или Git. Авторизация через `sudo` нужна потому, что скрипты также запускают Docker через `sudo`. Публичному пакету авторизация для скачивания не требуется.
+Репозиторий исходников и пакет GHCR **публичные**. Для скачивания не нужны GitHub-аккаунт, токен или `docker login`:
+
+```bash
+sudo docker pull ghcr.io/denbond007/mermaid-live-editor-runtime:1.0.0
+```
 
 ```bash
 cp -n .env.example .env

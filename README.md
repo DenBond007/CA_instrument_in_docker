@@ -9,6 +9,6 @@ tags: [start, docker, obsidian]
 
 Исходники проекта: https://github.com/DenBond007/CA_instrument_in_docker
 
-Образ: `ghcr.io/denbond007/mermaid-live-editor-runtime:1.0.0` (AMD64 и ARM64). Для закрытого пакета перед запуском выполните `sudo docker login ghcr.io`; подробности в **[[03 - Mermaid и локальный Kroki]]**.
+Публичный образ: `ghcr.io/denbond007/mermaid-live-editor-runtime:1.0.0` (AMD64 и ARM64). Скачивание доступно без авторизации и токенов; подробности в **[[03 - Mermaid и локальный Kroki]]**.
 
 Отдельная памятка: **[[09 - Portainer - инструкция со скриншотами]]**.

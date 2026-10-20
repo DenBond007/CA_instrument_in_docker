@@ -28,7 +28,7 @@ fi
 sudo docker compose config --quiet
 
 echo 'Скачиваем готовые образы, включая Mermaid из GHCR...'
-echo 'Для закрытого пакета сначала выполните sudo docker login ghcr.io (см. заметку 03).'
+echo 'Mermaid-пакет публичный: авторизация в GHCR для скачивания не требуется.'
 sudo docker compose pull
 sudo docker compose up -d --no-build
 

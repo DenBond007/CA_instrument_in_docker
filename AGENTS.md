@@ -12,7 +12,7 @@ This Docker Compose toolkit for system analysts includes Russian-language Obsidi
 
 ## Build, Test, and Development Commands
 
-Run from the repository root on Ubuntu with Docker Engine, Compose, curl, and sudo available. Create `.env` from `.env.example` if absent, then set `BIND_IP` to an address assigned to the host. Authenticate to GHCR for private packages.
+Run from the repository root on Ubuntu with Docker Engine, Compose, curl, and sudo available. Create `.env` from `.env.example` if absent, then set `BIND_IP` to an address assigned to the host. The published Mermaid image can be pulled anonymously from GHCR.
 
 - `bash scripts/first-run.sh` — checks prerequisites, pulls ready-made images, and starts services.
 - `sudo docker compose config --quiet` — validates the resolved configuration.
