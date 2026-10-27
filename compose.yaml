@@ -4,6 +4,31 @@
 name: sa-analyst-suite
 
 services:
+  portal:
+    image: ${PORTAL_IMAGE:-ghcr.io/denbond007/analyst-portal:1.0.0}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      PORTAL_HOST: "${PORTAL_HOST:-${BIND_IP:?Set BIND_IP in .env}}"
+      PORTAL_TITLE: "${PORTAL_TITLE:-Инструменты аналитика}"
+      PORTAL_SHOW_PORTAINER: "${PORTAL_SHOW_PORTAINER:-true}"
+      PORTAINER_URL: "${PORTAINER_URL:-}"
+      PORTAINER_PORT: "${PORTAINER_PORT:-9443}"
+      MERMAID_PORT: "${MERMAID_PORT:-18081}"
+      PLANTUML_PORT: "${PLANTUML_PORT:-18082}"
+      SWAGGER_EDITOR_PORT: "${SWAGGER_EDITOR_PORT:-18083}"
+      SWAGGER_UI_PORT: "${SWAGGER_UI_PORT:-18084}"
+      DRAWIO_PORT: "${DRAWIO_PORT:-18085}"
+      ASYNCAPI_PORT: "${ASYNCAPI_PORT:-18086}"
+      KROKI_PORT: "${KROKI_PORT:-18087}"
+      KROKI_URL: "${KROKI_URL:-http://${BIND_IP}:${KROKI_PORT:-18087}}"
+    ports:
+      - "${BIND_IP}:${PORTAL_PORT:-18080}:8080"
+
   kroki:
     image: yuzutech/kroki:latest
     restart: unless-stopped

@@ -1,0 +1,121 @@
+name: Test and publish analyst portal
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Image version, for example 1.0.0
+        required: true
+        default: '1.0.0'
+  push:
+    tags: ['portal-v*']
+  pull_request:
+    paths:
+      - 'docker/portal/**'
+      - 'tests/portal-runtime.test.mjs'
+      - 'tests/browser/portal.spec.mjs'
+      - 'compose*.yaml'
+      - 'package*.json'
+      - 'playwright.config.mjs'
+      - '.dockerignore'
+      - '.github/workflows/publish-portal.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portal-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Verify runtime settings and Compose
+        run: |
+          npm run test:portal
+          for script in scripts/*.sh; do bash -n "$script"; done
+          sh -n docker/portal/40-runtime-config.sh
+          BIND_IP=127.0.0.1 docker compose config --quiet
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build the image for browser tests
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: docker/portal/Dockerfile
+          load: true
+          tags: local/analyst-portal:test
+          cache-from: type=gha,scope=analyst-portal
+          cache-to: type=gha,mode=max,scope=analyst-portal
+      - run: npx playwright install --with-deps chromium
+      - name: Test links, search, mobile layout and runtime changes
+        run: npm run test:portal:browser
+        env:
+          PORTAL_TEST_IMAGE: local/analyst-portal:test
+
+  publish:
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Determine image name and version
+        id: image
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          version=${INPUT_VERSION:-${GITHUB_REF_NAME#portal-v}}
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+([.-][a-z0-9]+)*)?$ ]]; then
+            echo 'Expected a version such as 1.0.0 or 1.0.0-rc.1' >&2
+            exit 1
+          fi
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/analyst-portal"
+          {
+            echo "name=$image"
+            echo "version=$version"
+            echo 'tags<<TAGS'
+            echo "$image:$version"
+            echo "$image:sha-$GITHUB_SHA"
+            if [[ "$version" != *-* ]]; then echo "$image:latest"; fi
+            echo 'TAGS'
+          } >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish for AMD64 and ARM64
+        id: build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: docker/portal/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.image.outputs.tags }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.image.outputs.version }}
+          cache-from: type=gha,scope=analyst-portal
+          cache-to: type=gha,mode=max,scope=analyst-portal
+      - name: Record published image
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+          VERSION: ${{ steps.image.outputs.version }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          printf 'Published `%s:%s`\n\nDigest: `%s`\n' "$IMAGE" "$VERSION" "$DIGEST" >> "$GITHUB_STEP_SUMMARY"

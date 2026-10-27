@@ -27,8 +27,8 @@ fi
 
 sudo docker compose config --quiet
 
-echo 'Скачиваем готовые образы, включая Mermaid из GHCR...'
-echo 'Mermaid-пакет публичный: авторизация в GHCR для скачивания не требуется.'
+echo 'Скачиваем готовые образы, включая портал и Mermaid из GHCR...'
+echo 'Пакеты портала и Mermaid публичные: авторизация в GHCR для скачивания не требуется.'
 sudo docker compose pull
 sudo docker compose up -d --no-build
 
@@ -36,3 +36,4 @@ echo
 sudo docker compose ps
 printf '\nПроверка HTTP и API: bash scripts/healthcheck.sh\n'
 echo 'Portainer запускается отдельно: см. 02 - Установка и первый запуск.md'
+printf 'Стартовая страница: http://%s\n' "$(sudo docker compose port portal 8080)"

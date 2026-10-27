@@ -1,5 +1,11 @@
 # Optional local build; deployment from compose.yaml uses the image in GHCR.
 services:
+  portal:
+    image: local/analyst-portal:dev
+    build:
+      context: .
+      dockerfile: docker/portal/Dockerfile
+
   mermaid-editor:
     image: local/mermaid-live-editor-runtime:dev
     build:

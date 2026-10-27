@@ -8,5 +8,6 @@ read -rp 'Продолжить обновление? [y/N] ' answer
 sudo docker compose pull
 sudo docker compose up -d --no-build
 printf '\nВерсия Mermaid задаётся переменной MERMAID_IMAGE в .env.\n'
+echo 'Версия стартовой страницы задаётся PORTAL_IMAGE в .env.'
 echo 'Для перехода на новую версию измените тег MERMAID_IMAGE перед обновлением.'
 echo 'После обновления проверьте: bash scripts/healthcheck.sh'

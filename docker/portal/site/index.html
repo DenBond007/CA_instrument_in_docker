@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Инструменты системного аналитика: диаграммы, API и контракты в одном месте.">
+  <title>Инструменты аналитика</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/runtime-config.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к инструментам</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="monogram" aria-hidden="true">SA</div>
+        <div><div class="brand-name">Analyst workspace</div><div class="brand-subtitle">ВАШ РАБОЧИЙ НАБОР</div></div>
+      </div>
+      <div class="header-actions">
+        <span class="network-label"><svg class="icon" aria-hidden="true"><use href="/icons.svg#network"></use></svg>Локальная сеть</span>
+        <button class="theme-button" id="theme-toggle" type="button" aria-label="Сменить тему: системная" title="Тема: системная">
+          <svg class="icon" aria-hidden="true"><use href="/icons.svg#monitor"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+  <main id="main" class="main">
+    <div class="eyebrow">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+    <h1 id="portal-title">Инструменты аналитика</h1>
+    <p class="intro">От первой схемы до готового API-контракта.</p>
+    <div id="configuration-error" class="error-message" role="alert" hidden>Не удалось загрузить настройки. Обновите страницу или обратитесь к администратору.</div>
+    <noscript><p class="error-message">Включите JavaScript в браузере, чтобы открыть список инструментов.</p></noscript>
+    <div id="catalog" hidden>
+      <label class="search" for="tool-search">
+        <svg class="icon" aria-hidden="true"><use href="/icons.svg#search"></use></svg>
+        <span class="sr-only">Найти инструмент или задачу</span>
+        <input id="tool-search" type="search" placeholder="Найти инструмент или задачу…" autocomplete="off" spellcheck="false" maxlength="200">
+        <kbd aria-hidden="true">/</kbd>
+      </label>
+      <nav id="categories" class="filterbar" aria-label="Категории инструментов"></nav>
+      <div class="section-heading"><h2 id="section-title">Все инструменты</h2><span id="result-count" class="result-count" role="status" aria-live="polite"></span></div>
+      <div id="tools" class="tool-grid"></div>
+      <div id="empty-state" class="empty-state" hidden>
+        <h2>Ничего не найдено</h2><p>Попробуйте другое название или выберите все инструменты.</p>
+        <button id="reset-search" class="reset-button" type="button">Сбросить поиск</button>
+      </div>
+    </div>
+  </main>
+  <footer class="footer"><div class="footer-inner"><span>Меньше поиска ссылок. Больше работы по делу.</span><span id="portal-host" class="host"></span></div></footer>
+</body>
+</html>

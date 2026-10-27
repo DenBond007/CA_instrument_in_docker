@@ -7,7 +7,8 @@ This Docker Compose toolkit for system analysts includes Russian-language Obsidi
 - `compose.yaml` defines the editors and rendering services; `compose.portainer.yaml` manages optional Portainer separately.
 - `scripts/` contains setup, health-check, update, and configuration-backup scripts.
 - `specs/openapi.yaml` supplies Swagger UI; `samples/` contains Mermaid, PlantUML, and AsyncAPI examples.
-- Numbered notes (`00`–`14`) document operation; `assets/portainer/` holds screenshots.
+- Numbered notes (`00`–`15`) document operation; `assets/portainer/` and `assets/portal/` hold screenshots.
+- `docker/portal/` contains the static tool launcher, unprivileged Nginx image, and runtime link generator; the portal uses the same host/port settings as Compose.
 - `docker/mermaid/` contains the custom Dockerfile, checked upstream patch, and runtime configuration generator. `.github/workflows/` tests and publishes the image to GHCR.
 
 ## Build, Test, and Development Commands
@@ -18,6 +19,7 @@ Run from the repository root on Ubuntu with Docker Engine, Compose, curl, and su
 - `sudo docker compose config --quiet` — validates the resolved configuration.
 - `sudo docker compose up -d --no-build` — applies configuration using published images.
 - `sudo docker compose -f compose.yaml -f compose.build.yaml build mermaid-editor` — builds the custom image locally for development.
+- `sudo docker compose -f compose.yaml -f compose.build.yaml build portal` — builds the portal locally for development.
 - `bash scripts/healthcheck.sh` — checks HTTP endpoints and Kroki Mermaid SVG rendering.
 - `bash scripts/backup-config.sh` — archives configuration, including `.env`; excludes Portainer volume data.
 - `bash scripts/update.sh` — updates images after confirmation; choose Mermaid's version with `MERMAID_IMAGE`.
@@ -31,6 +33,8 @@ Use two-space indentation in YAML and Bash blocks. Preserve Bash shebangs, `set 
 ## Testing Guidelines
 
 Run `npm ci` and `npm test` for Node's built-in runtime-config tests (requires jq). After building the image, run `npx playwright install chromium` and `npm run test:browser`; Playwright verifies real diagram rendering and two Kroki addresses with the same image. Check shell syntax and validate Compose. No coverage threshold is configured. Run the stack health check on Ubuntu for deployed services.
+
+For the portal, run `npm run test:portal`, build the image, then run `npm run test:portal:browser`. These checks cover runtime links, safe configuration, optional Portainer, search, themes, mobile layout, and local-only asset loading. `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` may select an existing Chromium installation.
 
 ## Commit & Pull Request Guidelines
 

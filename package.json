@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/mermaid-runtime.test.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test mermaid-runtime",
+    "test:portal": "node --test tests/portal-runtime.test.mjs",
+    "test:portal:browser": "playwright test portal"
   },
   "devDependencies": {
     "@playwright/test": "1.60.0"

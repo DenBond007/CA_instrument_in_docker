@@ -2,3 +2,5 @@
 !docker/
 !docker/mermaid/
 !docker/mermaid/**
+!docker/portal/
+!docker/portal/**

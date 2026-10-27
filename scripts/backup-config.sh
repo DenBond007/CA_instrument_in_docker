@@ -10,7 +10,7 @@ tar -czf "$ARCHIVE" \
   --exclude=./.obsidian/workspace.json \
   --exclude=./.git \
   compose.yaml compose.portainer.yaml compose.build.yaml .env.example .env \
-  scripts samples specs docker tests .github package.json package-lock.json \
+  scripts samples specs docker tests assets .github package.json package-lock.json \
   playwright.config.mjs .dockerignore ./*.md
 chmod 600 "$ARCHIVE"
 echo "Создан архив конфигурации и файлов: $ARCHIVE"

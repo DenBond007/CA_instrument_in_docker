@@ -4,6 +4,13 @@ export default defineConfig({
   testDir: './tests/browser',
   workers: 1,
   timeout: 120_000,
-  use: { browserName: 'chromium', headless: true, trace: 'retain-on-failure' },
+  use: {
+    browserName: 'chromium',
+    headless: true,
+    trace: 'retain-on-failure',
+    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      : {}
+  },
   reporter: 'list'
 });
