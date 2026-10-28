@@ -1,0 +1,31 @@
+{
+  "enableAi": true,
+  "aiActions": ["create", "update"],
+  "aiGlobals": {
+    "localApiKey": "REPLACE_IN_PRIVATE_LOCAL_FILE",
+    "create": "Create an editable draw.io diagram for the request. Return only complete valid draw.io XML, without Markdown or explanations.",
+    "update": "Modify the supplied draw.io diagram according to the request. Keep existing cell IDs when retaining cells. Return only the complete updated XML.\n{data}"
+  },
+  "aiConfigs": {
+    "local": {
+      "apiKey": "localApiKey",
+      "endpoint": "http://192.168.88.42:8888/v1/chat/completions",
+      "requestHeaders": {
+        "Authorization": "Bearer {apiKey}"
+      },
+      "request": {
+        "model": "{model}",
+        "messages": [
+          { "role": "system", "content": "{action}" },
+          { "role": "user", "content": "{prompt}" }
+        ],
+        "stream": false,
+        "max_tokens": 4096
+      },
+      "responsePath": "$.choices[0].message.content"
+    }
+  },
+  "aiModels": [
+    { "name": "Local Unsloth", "model": "unsloth/Qwen3.8-27B-GGUF", "config": "local" }
+  ]
+}

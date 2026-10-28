@@ -10,7 +10,7 @@ set +a
 
 printf '%-20s %s\n' SERVICE HTTP
 failed=0
-for spec in "Portal:${PORTAL_PORT:-18080}" "Mermaid:${MERMAID_PORT:-18081}" "PlantUML:${PLANTUML_PORT:-18082}" "SwaggerEditor:${SWAGGER_EDITOR_PORT:-18083}" "SwaggerUI:${SWAGGER_UI_PORT:-18084}" "draw.io:${DRAWIO_PORT:-18085}" "AsyncAPI:${ASYNCAPI_PORT:-18086}" "Kroki:${KROKI_PORT:-18087}"; do
+for spec in "Portal:${PORTAL_PORT:-18080}" "Mermaid:${MERMAID_PORT:-18081}" "PlantUML:${PLANTUML_PORT:-18082}" "SwaggerEditor:${SWAGGER_EDITOR_PORT:-18083}" "SwaggerUI:${SWAGGER_UI_PORT:-18084}" "draw.io:${DRAWIO_PORT:-18085}" "NextAIDrawio:${AI_DRAWIO_PORT:-18088}" "AsyncAPI:${ASYNCAPI_PORT:-18086}" "Kroki:${KROKI_PORT:-18087}"; do
   label=${spec%%:*}; port=${spec##*:}
   http=$(curl -L -sS -o /dev/null -w '%{http_code}' --max-time 8 "http://${BIND_IP}:${port}/" 2>/dev/null) || http='000'
   printf '%-20s %s\n' "$label" "$http"

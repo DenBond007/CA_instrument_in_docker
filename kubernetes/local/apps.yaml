@@ -1,0 +1,581 @@
+# Готовые образы для локального ПК; .env не читается.
+# Сначала создайте analyst-openapi из specs/openapi.yaml по инструкции.
+# AI не настроен; /app/data Next AI Draw.io временный (emptyDir).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drawio-settings
+  namespace: sa-analyst-local
+data:
+  drawio.json: |
+    {"enableAi": false, "aiActions": []}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      labels:
+        app: portal
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: portal
+          image: ghcr.io/denbond007/analyst-portal:1.0.0
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: PORTAL_HOST
+              value: 127.0.0.1
+            - name: PORTAL_SHOW_PORTAINER
+              value: 'false'
+            - name: DRAWIO_AI_ENABLED
+              value: 'false'
+            - name: KROKI_URL
+              value: http://127.0.0.1:18087
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: portal
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kroki
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kroki
+  template:
+    metadata:
+      labels:
+        app: kroki
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: kroki
+          image: yuzutech/kroki:latest
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: KROKI_BPMN_HOST
+              value: kroki-bpmn
+            - name: KROKI_MERMAID_HOST
+              value: kroki-mermaid
+            - name: KROKI_SAFE_MODE
+              value: SECURE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kroki
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: kroki
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kroki-mermaid
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kroki-mermaid
+  template:
+    metadata:
+      labels:
+        app: kroki-mermaid
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: kroki-mermaid
+          image: yuzutech/kroki-mermaid:latest
+          ports:
+            - name: http
+              containerPort: 8002
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kroki-mermaid
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: kroki-mermaid
+  ports:
+    - name: http
+      port: 8002
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kroki-bpmn
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kroki-bpmn
+  template:
+    metadata:
+      labels:
+        app: kroki-bpmn
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: kroki-bpmn
+          image: yuzutech/kroki-bpmn:latest
+          ports:
+            - name: http
+              containerPort: 8003
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kroki-bpmn
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: kroki-bpmn
+  ports:
+    - name: http
+      port: 8003
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mermaid-editor
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mermaid-editor
+  template:
+    metadata:
+      labels:
+        app: mermaid-editor
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: mermaid-editor
+          image: ghcr.io/denbond007/mermaid-live-editor-runtime:1.0.0
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: KROKI_URL
+              value: http://127.0.0.1:18087
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mermaid-editor
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: mermaid-editor
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plantuml
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plantuml
+  template:
+    metadata:
+      labels:
+        app: plantuml
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: plantuml
+          image: plantuml/plantuml-server:jetty
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: PLANTUML_SECURITY_PROFILE
+              value: SANDBOX
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plantuml
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: plantuml
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger-editor
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-editor
+  template:
+    metadata:
+      labels:
+        app: swagger-editor
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: swagger-editor
+          image: docker.swagger.io/swaggerapi/swagger-editor:next-v5
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: swagger-editor
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: swagger-editor
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger-ui
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-ui
+  template:
+    metadata:
+      labels:
+        app: swagger-ui
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: swagger-ui
+          image: docker.swagger.io/swaggerapi/swagger-ui:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: SUPPORTED_SUBMIT_METHODS
+              value: '[]'
+            - name: SWAGGER_JSON
+              value: /specs/openapi.yaml
+            - name: VALIDATOR_URL
+              value: none
+          volumeMounts:
+            - name: openapi
+              mountPath: /specs
+              readOnly: true
+      volumes:
+        - name: openapi
+          configMap:
+            name: analyst-openapi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: swagger-ui
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: swagger-ui
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drawio
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drawio
+  template:
+    metadata:
+      labels:
+        app: drawio
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: drawio
+          image: jgraph/drawio:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: DRAWIO_CONFIG_FILE
+              value: /config/drawio.json
+            - name: DRAWIO_LANG
+              value: ru
+          volumeMounts:
+            - name: settings
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: settings
+          configMap:
+            name: drawio-settings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drawio
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: drawio
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asyncapi
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: asyncapi
+  template:
+    metadata:
+      labels:
+        app: asyncapi
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: asyncapi
+          image: asyncapi/studio:latest
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: asyncapi
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: asyncapi
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-drawio
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-drawio
+  template:
+    metadata:
+      labels:
+        app: ai-drawio
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: ai-drawio
+          image: ghcr.io/dayuanjiang/next-ai-draw-io:0.5.0
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          env:
+            - name: AI_PROVIDER
+              value: openai
+            - name: AI_MODEL
+              value: ''
+            - name: OPENAI_BASE_URL
+              value: http://127.0.0.1:11434/v1
+            - name: OPENAI_API_KEY
+              value: ''
+            - name: MAX_OUTPUT_TOKENS
+              value: '8192'
+            - name: NEXT_TELEMETRY_DISABLED
+              value: '1'
+            - name: ALLOW_PRIVATE_URLS
+              value: 'true'
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.next/cache
+            - name: data
+              mountPath: /app/data
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+        - name: cache
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-drawio
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: ai-drawio
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

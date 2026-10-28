@@ -31,10 +31,11 @@ test('cards, search, categories, empty state and browser links work without exte
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => { if (!request.url().startsWith(baseUrl + '/')) outsideRequests.push(request.url()); });
   await page.goto(baseUrl);
-  await expect(page.locator('.tool-card:visible')).toHaveCount(8);
+  await expect(page.locator('.tool-card:visible')).toHaveCount(9);
   await expect(page.getByRole('heading', { name: 'Инструменты аналитика', exact: true })).toBeVisible();
   await expect(page.locator('[data-tool="mermaid"] a')).toHaveAttribute('href', 'http://192.0.2.10:18081/');
-  await expect(page.locator('[data-tool="drawio"] a')).toHaveAttribute('href', 'http://192.0.2.10:18085/?offline=1&https=0');
+  await expect(page.locator('[data-tool="drawio"] a')).toHaveAttribute('href', 'http://192.0.2.10:18085/?offline=0&https=0&mode=device');
+  await expect(page.locator('[data-tool="ai-drawio"] a')).toHaveAttribute('href', 'http://192.0.2.10:18088/');
   await expect(page.locator('[data-tool="portainer"] a')).toHaveAttribute('href', 'https://192.0.2.10:9443/');
   for (const link of await page.locator('.open-link').all()) {
     await expect(link).toHaveAttribute('target', '_blank');
@@ -46,15 +47,19 @@ test('cards, search, categories, empty state and browser links work without exte
   await page.getByRole('searchbox').fill('сваггер openapi');
   await expect(page.locator('.tool-card:visible')).toHaveCount(2);
   await page.getByRole('searchbox').fill('');
+  await page.getByRole('searchbox').fill('unsloth');
+  await expect(page.locator('.tool-card:visible')).toHaveCount(1);
+  await expect(page.locator('[data-tool="ai-drawio"]')).toBeVisible();
+  await page.getByRole('searchbox').fill('');
   await page.locator('[data-category="diagrams"]').click();
-  await expect(page.locator('.tool-card:visible')).toHaveCount(3);
+  await expect(page.locator('.tool-card:visible')).toHaveCount(4);
   await expect(page.locator('[data-category="diagrams"]')).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('searchbox').fill('несуществующий инструмент');
   await expect(page.locator('#empty-state')).toBeVisible();
   await page.getByRole('button', { name: 'Сбросить поиск' }).click();
-  await expect(page.locator('.tool-card:visible')).toHaveCount(8);
+  await expect(page.locator('.tool-card:visible')).toHaveCount(9);
   await expect(page.getByRole('searchbox')).toBeFocused();
-  await expect(page.locator('#result-count')).toHaveText('Показано: 8');
+  await expect(page.locator('#result-count')).toHaveText('Показано: 9');
   const response = await page.request.get(`${baseUrl}/runtime-config.js`);
   expect(response.headers()['cache-control']).toBe('no-store');
   expect(response.headers()['content-security-policy']).toContain("connect-src 'none'");
@@ -65,16 +70,17 @@ test('cards, search, categories, empty state and browser links work without exte
 
 test('the same image uses different runtime ports, custom URLs and optional Portainer', async ({ page, request }) => {
   const changed = start({ PORTAL_HOST: 'tools.example.internal', PORTAL_TITLE: 'Команда аналитики', MERMAID_PORT: '28081',
-    DRAWIO_PORT: '28085', KROKI_URL: 'https://diagrams.example.internal/kroki/', PORTAL_SHOW_PORTAINER: 'false' });
+    DRAWIO_PORT: '28085', AI_DRAWIO_PORT: '28088', KROKI_URL: 'https://diagrams.example.internal/kroki/', PORTAL_SHOW_PORTAINER: 'false' });
   try {
     await expect.poll(async () => {
       try { return (await request.get(`${changed.url}/health`)).status(); } catch { return 0; }
     }).toBe(200);
     await page.goto(changed.url);
     await expect(page.getByRole('heading', { name: 'Команда аналитики', exact: true })).toBeVisible();
-    await expect(page.locator('.tool-card:visible')).toHaveCount(7);
+    await expect(page.locator('.tool-card:visible')).toHaveCount(8);
     await expect(page.locator('[data-tool="mermaid"] a')).toHaveAttribute('href', 'http://tools.example.internal:28081/');
-    await expect(page.locator('[data-tool="drawio"] a')).toHaveAttribute('href', 'http://tools.example.internal:28085/?offline=1&https=0');
+    await expect(page.locator('[data-tool="drawio"] a')).toHaveAttribute('href', 'http://tools.example.internal:28085/?offline=0&https=0&mode=device');
+    await expect(page.locator('[data-tool="ai-drawio"] a')).toHaveAttribute('href', 'http://tools.example.internal:28088/');
     await expect(page.locator('[data-tool="kroki"] a')).toHaveAttribute('href', 'https://diagrams.example.internal/kroki');
     await expect(page.locator('[data-tool="portainer"]')).toHaveCount(0);
   } finally { docker('rm', '-f', changed.id); }
@@ -89,7 +95,7 @@ test('theme preference survives reload and mobile layout fits a narrow screen', 
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   for (const width of [1024, 736, 360, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    await expect(page.locator('.tool-card:visible')).toHaveCount(8);
+    await expect(page.locator('.tool-card:visible')).toHaveCount(9);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   }
   await page.getByRole('searchbox').fill('кроки');

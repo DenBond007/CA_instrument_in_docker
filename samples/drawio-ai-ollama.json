@@ -1,0 +1,9 @@
+{
+  "enableAi": true,
+  "aiActions": ["create", "update"],
+  "gptApiKey": "ollama",
+  "gptUrl": "http://localhost:11434/v1/chat/completions",
+  "aiModels": [
+    { "name": "Local Ollama", "model": "qwen3:8b", "config": "gpt" }
+  ]
+}

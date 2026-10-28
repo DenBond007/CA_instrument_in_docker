@@ -3,10 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/mermaid-runtime.test.mjs tests/cleanup-disk.test.mjs",
+    "test": "node --test tests/mermaid-runtime.test.mjs tests/cleanup-disk.test.mjs tests/drawio-config.test.mjs",
     "test:browser": "playwright test mermaid-runtime",
     "test:portal": "node --test tests/portal-runtime.test.mjs",
-    "test:portal:browser": "playwright test portal"
+    "test:portal:browser": "playwright test portal",
+    "test:ai-drawio:browser": "playwright test ai-drawio",
+    "test:drawio:browser": "playwright test native-drawio"
   },
   "devDependencies": {
     "@playwright/test": "1.60.0"

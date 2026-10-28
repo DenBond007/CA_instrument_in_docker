@@ -30,6 +30,9 @@ jq -cn --arg host "$portal_host" '
   (env.PORTAL_SHOW_PORTAINER // "true") as $show_portainer |
   if $show_portainer == "true" or $show_portainer == "false" then .
   else error("PORTAL_SHOW_PORTAINER must be true or false") end |
+  (env.DRAWIO_AI_ENABLED // "true") as $drawio_ai |
+  if $drawio_ai == "true" or $drawio_ai == "false" then .
+  else error("DRAWIO_AI_ENABLED must be true or false") end |
   ("http://" + $host + ":") as $http |
   ($http + port("KROKI_PORT"; env.KROKI_PORT // "18087")) as $default_kroki |
   ("https://" + $host + ":" + port("PORTAINER_PORT"; env.PORTAINER_PORT // "9443")) as $default_portainer |
@@ -40,7 +43,8 @@ jq -cn --arg host "$portal_host" '
     tools: ({
       mermaid: ($http + port("MERMAID_PORT"; env.MERMAID_PORT // "18081")),
       plantuml: ($http + port("PLANTUML_PORT"; env.PLANTUML_PORT // "18082")),
-      drawio: ($http + port("DRAWIO_PORT"; env.DRAWIO_PORT // "18085") + "/?offline=1&https=0"),
+      drawio: ($http + port("DRAWIO_PORT"; env.DRAWIO_PORT // "18085") + "/?offline=" + (if $drawio_ai == "true" then "0" else "1" end) + "&https=0&mode=device"),
+      "ai-drawio": ($http + port("AI_DRAWIO_PORT"; env.AI_DRAWIO_PORT // "18088")),
       "swagger-editor": ($http + port("SWAGGER_EDITOR_PORT"; env.SWAGGER_EDITOR_PORT // "18083")),
       "swagger-ui": ($http + port("SWAGGER_UI_PORT"; env.SWAGGER_UI_PORT // "18084")),
       asyncapi: ($http + port("ASYNCAPI_PORT"; env.ASYNCAPI_PORT // "18086")),

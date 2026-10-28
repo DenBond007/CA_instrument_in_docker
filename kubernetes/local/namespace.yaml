@@ -1,0 +1,5 @@
+# Только локальный кластер. Инструкция: 18 - Быстрый старт в локальном Kubernetes.md
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sa-analyst-local

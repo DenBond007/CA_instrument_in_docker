@@ -1,0 +1,183 @@
+# Доступ с ПК только через kubectl port-forward --address 127.0.0.1.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-gateway
+  namespace: sa-analyst-local
+data:
+  default.conf: |
+    # Один gateway для одной команды kubectl port-forward с девятью портами.
+    server_tokens off;
+    client_max_body_size 20m;
+    proxy_http_version 1.1;
+    proxy_set_header Host $http_host;
+    proxy_set_header Connection "";
+    proxy_buffering off;
+    proxy_read_timeout 600s;
+    proxy_send_timeout 600s;
+
+    server {
+      listen 18080;
+      location / {
+        proxy_pass http://portal:8080;
+      }
+    }
+
+    server {
+      listen 18081;
+      location / {
+        proxy_pass http://mermaid-editor:8080;
+      }
+    }
+
+    server {
+      listen 18082;
+      location / {
+        proxy_pass http://plantuml:8080;
+      }
+    }
+
+    server {
+      listen 18083;
+      location / {
+        proxy_pass http://swagger-editor:80;
+      }
+    }
+
+    server {
+      listen 18084;
+      location / {
+        proxy_pass http://swagger-ui:8080;
+      }
+    }
+
+    server {
+      listen 18085;
+      location / {
+        proxy_pass http://drawio:8080;
+      }
+    }
+
+    server {
+      listen 18086;
+      location / {
+        proxy_pass http://asyncapi:80;
+      }
+    }
+
+    server {
+      listen 18087;
+      location / {
+        proxy_pass http://kroki:8000;
+      }
+    }
+
+    server {
+      listen 18088;
+      location / {
+        proxy_pass http://ai-drawio:3000;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: local-gateway
+  namespace: sa-analyst-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: local-gateway
+  template:
+    metadata:
+      labels:
+        app: local-gateway
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: gateway
+          image: ghcr.io/nginx/nginx-unprivileged:stable-alpine@sha256:2daef144b574804198caccc4041819fa1801ecd5df2252a39646bfa2b1ff3bea
+          ports:
+            - name: http-18080
+              containerPort: 18080
+            - name: http-18081
+              containerPort: 18081
+            - name: http-18082
+              containerPort: 18082
+            - name: http-18083
+              containerPort: 18083
+            - name: http-18084
+              containerPort: 18084
+            - name: http-18085
+              containerPort: 18085
+            - name: http-18086
+              containerPort: 18086
+            - name: http-18087
+              containerPort: 18087
+            - name: http-18088
+              containerPort: 18088
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http-18080
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: local-gateway
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: local-gateway
+  namespace: sa-analyst-local
+spec:
+  type: ClusterIP
+  selector:
+    app: local-gateway
+  ports:
+    - name: http-18080
+      port: 18080
+      targetPort: http-18080
+    - name: http-18081
+      port: 18081
+      targetPort: http-18081
+    - name: http-18082
+      port: 18082
+      targetPort: http-18082
+    - name: http-18083
+      port: 18083
+      targetPort: http-18083
+    - name: http-18084
+      port: 18084
+      targetPort: http-18084
+    - name: http-18085
+      port: 18085
+      targetPort: http-18085
+    - name: http-18086
+      port: 18086
+      targetPort: http-18086
+    - name: http-18087
+      port: 18087
+      targetPort: http-18087
+    - name: http-18088
+      port: 18088
+      targetPort: http-18088

@@ -1,4 +1,6 @@
 .env
+.local/
+drawio-ai.local.json
 vendor/mermaid-live-editor/
 backup/*.tar.gz
 backup/*.tgz

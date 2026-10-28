@@ -4,7 +4,8 @@
   const toolDefinitions = [
     { id: 'mermaid', name: 'Mermaid Live Editor', description: 'Диаграммы из текста с живым предпросмотром', category: 'diagrams', label: 'Диаграммы', icon: 'workflow', keywords: 'мермейд схемы sequence flowchart последовательность' },
     { id: 'plantuml', name: 'PlantUML', description: 'UML-схемы и диаграммы последовательности', category: 'diagrams', label: 'Диаграммы', icon: 'git-branch', keywords: 'плант uml sequence классы' },
-    { id: 'drawio', name: 'draw.io', description: 'Блок-схемы и архитектура в визуальном редакторе', category: 'diagrams', label: 'Диаграммы', icon: 'pencil-ruler', keywords: 'drawio дравио схемы архитектура bpmn' },
+    { id: 'drawio', name: 'draw.io', description: 'Визуальные схемы и встроенный AI-помощник', category: 'diagrams', label: 'Диаграммы', icon: 'pencil-ruler', keywords: 'drawio дравио схемы архитектура bpmn штатный ии llm' },
+    { id: 'ai-drawio', name: 'Next AI Draw.io', description: 'Создание и изменение схем через чат с LLM', category: 'diagrams', label: 'Диаграммы', icon: 'pencil-ruler', keywords: 'ai ии нейросеть llm unsloth ollama deepseek openai qwen drawio' },
     { id: 'swagger-editor', name: 'Swagger Editor', description: 'Создание и редактирование OpenAPI-контрактов', category: 'api', label: 'API и контракты', icon: 'braces', keywords: 'сваггер openapi yaml json rest редактор' },
     { id: 'swagger-ui', name: 'Swagger UI', description: 'Просмотр документации вашего OpenAPI', category: 'api', label: 'API и контракты', icon: 'book-open', keywords: 'сваггер openapi документация спецификация' },
     { id: 'asyncapi', name: 'AsyncAPI Studio', description: 'События, сообщения и асинхронные контракты', category: 'api', label: 'API и контракты', icon: 'radio', keywords: 'асинхронные kafka брокер события сообщения' },

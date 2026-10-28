@@ -1,0 +1,23 @@
+# Optional native draw.io AI configuration; see 08 - draw.io.md.
+# Copy samples/drawio-ai-ollama.json to ignored drawio-ai.local.json first.
+services:
+  drawio:
+    environment:
+      DRAWIO_CONFIG_FILE: /config/drawio-ai.json
+      DRAWIO_CSP_HEADER: >-
+        default-src \'self\';
+        script-src \'self\' \'unsafe-inline\';
+        connect-src \'self\' ${DRAWIO_AI_ALLOWED_ORIGINS:-http://localhost:11434 http://127.0.0.1:11434};
+        img-src \'self\' data: blob:;
+        media-src \'self\' data: blob:;
+        font-src \'self\' data:;
+        style-src \'self\' \'unsafe-inline\';
+        frame-src \'self\';
+        worker-src \'self\' blob:;
+    volumes:
+      - type: bind
+        source: ./drawio-ai.local.json
+        target: /config/drawio-ai.json
+        read_only: true
+        bind:
+          create_host_path: false
